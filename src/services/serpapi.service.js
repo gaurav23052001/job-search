@@ -10,7 +10,7 @@ module.exports = async (query) => {
   if (googleKey && googleCx) {
     console.log(`Searching using Google Custom Search for query: "${query}"`);
     try {
-      const url = `https://customsearch.googleapis.com/customsearch/v1?key=${googleKey}&cx=${googleCx}&q=${encodeURIComponent(query)}`;
+      const url = `https://customsearch.googleapis.com/customsearch/v1?key=${googleKey}&cx=${googleCx}&q=${encodeURIComponent(query)}&dateRestrict=d1`;
       const response = await axios.get(url);
       const items = response.data.items || [];
       return items.map(item => ({
@@ -27,7 +27,7 @@ module.exports = async (query) => {
   if (apiKey) {
     console.log(`Searching using SerpAPI for query: "${query}"`);
     try {
-      const url = `https://serpapi.com/search.json?engine=google&q=${encodeURIComponent(query)}&api_key=${apiKey}`;
+      const url = `https://serpapi.com/search.json?engine=google&q=${encodeURIComponent(query)}&api_key=${apiKey}&tbs=qdr:d`;
       const response = await axios.get(url);
       const results = response.data.organic_results || [];
       return results.map(r => ({
@@ -43,7 +43,7 @@ module.exports = async (query) => {
   // Option 3: Fallback to free DuckDuckGo HTML search (Unlimited, no keys)
   console.log(`Searching using DuckDuckGo (Free/No-Key) for query: "${query}"`);
   try {
-    const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
+    const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}&df=d`;
     const { data } = await axios.get(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36'
