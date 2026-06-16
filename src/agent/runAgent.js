@@ -19,23 +19,15 @@ const isActualJobPost = (url) => {
     const hostname = parsed.hostname.toLowerCase();
     const pathname = parsed.pathname.toLowerCase();
 
-    // LinkedIn check: must be a job view page
+    // Only LinkedIn is allowed now: must be a job view page or a post
     if (hostname.includes('linkedin.com')) {
-      return (pathname.includes('/jobs/view') || pathname.includes('/jobs-guest/jobs/api/job')) && 
-             !pathname.includes('/jobs/search') && 
-             !pathname.includes('/company/');
-    }
-
-    // Naukri check: must be a specific job listings page
-    if (hostname.includes('naukri.com')) {
-      return pathname.includes('/job-listings-') && !pathname.includes('/company/');
-    }
-
-    // Indeed check: must be a specific job view page
-    if (hostname.includes('indeed.com')) {
-      return (pathname.includes('/viewjob') || pathname.includes('/rc/clk') || pathname.includes('/job/')) && 
-             !pathname.includes('/q-') && 
-             !pathname.includes('/cmp/');
+      return (
+        pathname.includes('/jobs/view') || 
+        pathname.includes('/jobs-guest/jobs/api/job') || 
+        pathname.includes('/posts')
+      ) && 
+      !pathname.includes('/jobs/search') && 
+      !pathname.includes('/company/');
     }
 
     return false;
@@ -100,6 +92,15 @@ module.exports = async () => {
 
         const title = r.title || r.jobTitle || 'Untitled';
         const snippet = r.snippet || r.description || '';
+
+        // Check for node and hiring keywords programmatically
+        const text = `${title} ${snippet}`.toLowerCase();
+        const hasNode = text.includes('node');
+        const hasHiring = text.includes('hiring') || text.includes('hire');
+        if (!hasNode || !hasHiring) {
+          console.log(`Skipped job lacking node/hiring keywords: ${title}`);
+          continue;
+        }
 
         if (isClosedJob(title, snippet)) {
           console.log(`Skipped closed job: ${title}`);
